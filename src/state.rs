@@ -3,6 +3,7 @@
 use crate::protocol::{AcpMessage, AgentInfo};
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 /// A question this agent asked, tracking incoming answers
 #[derive(Debug)]
@@ -50,13 +51,29 @@ impl AgentState {
     }
 
     pub fn add_peer(&mut self, info: AgentInfo) {
-        if info.peer_id != self.me.peer_id {
-            println!(
-                "  [mesh] peer joined: {} ({})",
-                info.alias,
-                &info.peer_id[..12]
-            );
-            self.peers.insert(info.peer_id.clone(), info);
+        if info.peer_id == self.me.peer_id {
+            return;
+        }
+
+        match self.peers.entry(info.peer_id.clone()) {
+            Entry::Vacant(entry) => {
+                println!(
+                    "  [mesh] peer joined: {} ({})",
+                    info.alias,
+                    short_peer_id(&info.peer_id)
+                );
+                entry.insert(info);
+            }
+            Entry::Occupied(mut entry) => {
+                if entry.get() != &info {
+                    println!(
+                        "  [mesh] peer updated: {} ({})",
+                        info.alias,
+                        short_peer_id(&info.peer_id)
+                    );
+                    entry.insert(info);
+                }
+            }
         }
     }
 
@@ -112,10 +129,78 @@ impl AgentState {
                 println!(
                     "  - {} [{}] caps: {:?}",
                     p.alias,
-                    &p.peer_id[..12],
+                    short_peer_id(&p.peer_id),
                     p.capabilities
                 );
             }
         }
+    }
+}
+
+fn short_peer_id(peer_id: &str) -> &str {
+    let end = peer_id.len().min(12);
+    &peer_id[..end]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn info(peer_id: &str, alias: &str, capabilities: &[&str]) -> AgentInfo {
+        AgentInfo {
+            peer_id: peer_id.to_string(),
+            alias: alias.to_string(),
+            capabilities: capabilities.iter().map(|cap| cap.to_string()).collect(),
+        }
+    }
+
+    #[test]
+    fn ignores_self_peer() {
+        let me = info("peer-a", "alice", &["rust"]);
+        let mut state = AgentState::new(me.clone());
+
+        state.add_peer(me);
+
+        assert_eq!(state.peer_count(), 0);
+    }
+
+    #[test]
+    fn updates_peer_without_duplicating() {
+        let mut state = AgentState::new(info("peer-a", "alice", &[]));
+
+        state.add_peer(info("peer-b", "bob", &["rust"]));
+        state.add_peer(info("peer-b", "bob", &["rust", "math"]));
+
+        assert_eq!(state.peer_count(), 1);
+        assert_eq!(
+            state.peers.get("peer-b").unwrap().capabilities,
+            vec!["rust", "math"]
+        );
+    }
+
+    #[test]
+    fn answers_when_any_required_capability_matches() {
+        let state = AgentState::new(info("peer-a", "alice", &["rust", "math"]));
+
+        assert!(state.should_answer(&[]));
+        assert!(state.should_answer(&["python".to_string(), "rust".to_string()]));
+        assert!(!state.should_answer(&["python".to_string()]));
+    }
+
+    #[test]
+    fn records_seen_questions() {
+        let mut state = AgentState::new(info("peer-a", "alice", &[]));
+        let msg = AcpMessage::Question {
+            question_id: "q1".to_string(),
+            from_peer: "peer-b".to_string(),
+            from_alias: "bob".to_string(),
+            content: "hello".to_string(),
+            required_caps: vec![],
+            timestamp: Utc::now(),
+        };
+
+        state.record_question(&msg);
+
+        assert_eq!(state.seen_questions.get("q1").unwrap(), "hello");
     }
 }

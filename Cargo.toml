@@ -3,11 +3,16 @@ name = "acp-p2p"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = []
+acp = ["dep:agent-client-protocol"]
+
 [[bin]]
 name = "agent"
 path = "src/main.rs"
 
 [dependencies]
+agent-client-protocol = { version = "0.12.1", optional = true }
 libp2p = { version = "=0.52.4", features = ["tcp", "noise", "yamux", "mdns", "identify", "gossipsub", "tokio", "macros"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }

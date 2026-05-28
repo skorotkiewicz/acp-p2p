@@ -23,7 +23,7 @@ impl Answerer {
         let q = question.to_lowercase();
 
         // -- Rust knowledge --
-        if self.capabilities.contains(&"rust".to_string()) {
+        if self.has_capability("rust") {
             if q.contains("fibonacci") && q.contains("rust") {
                 return Some((
                     "In Rust:\n\
@@ -66,7 +66,7 @@ impl Answerer {
         }
 
         // -- Python knowledge --
-        if self.capabilities.contains(&"python".to_string()) {
+        if self.has_capability("python") {
             if q.contains("fibonacci") && (q.contains("python") || !q.contains("rust")) {
                 return Some((
                     "In Python:\ndef fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a+b\n    return a"
@@ -93,7 +93,7 @@ impl Answerer {
         }
 
         // -- Networking knowledge --
-        if self.capabilities.contains(&"networking".to_string()) {
+        if self.has_capability("networking") {
             if q.contains("tcp") || q.contains("udp") {
                 return Some((
                     "TCP is reliable, ordered, connection-oriented. UDP is fast, unordered, connectionless. \
@@ -113,7 +113,7 @@ impl Answerer {
         }
 
         // -- Math knowledge --
-        if self.capabilities.contains(&"math".to_string()) {
+        if self.has_capability("math") {
             if q.contains("fibonacci") {
                 return Some((
                     "Fibonacci sequence: F(0)=0, F(1)=1, F(n)=F(n-1)+F(n-2). \
@@ -133,5 +133,37 @@ impl Answerer {
         }
 
         None // can't answer this question
+    }
+
+    fn has_capability(&self, capability: &str) -> bool {
+        self.capabilities.iter().any(|cap| cap == capability)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rust_agent_answers_rust_fibonacci() {
+        let answerer = Answerer::new("alice".to_string(), vec!["rust".to_string()]);
+
+        let answer = answerer
+            .try_answer("how to write fibonacci function in rust")
+            .unwrap();
+
+        assert!(answer.0.contains("fn fibonacci"));
+        assert!(answer.1 > 0.9);
+    }
+
+    #[test]
+    fn python_agent_does_not_answer_rust_question() {
+        let answerer = Answerer::new("bob".to_string(), vec!["python".to_string()]);
+
+        assert!(
+            answerer
+                .try_answer("how to write fibonacci function in rust")
+                .is_none()
+        );
     }
 }
