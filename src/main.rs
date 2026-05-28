@@ -4,29 +4,28 @@
 //   cargo run -- --alias alice --caps rust,math
 //   cargo run -- --alias bob   --caps python,networking
 
+mod answerer;
 mod protocol;
 mod state;
-mod answerer;
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::time::Duration;
 
+use chrono::Utc;
 use clap::Parser;
 use futures::StreamExt;
 use libp2p::{
     gossipsub, identify, mdns,
     swarm::{NetworkBehaviour, SwarmEvent},
-    PeerId,
 };
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 use tracing_subscriber::EnvFilter;
 use uuid::Uuid;
-use chrono::Utc;
 
+use answerer::Answerer;
 use protocol::{AcpMessage, AgentInfo};
 use state::{AgentState, PendingQuestion, ReceivedAnswer};
-use answerer::Answerer;
 
 // ─── CLI ────────────────────────────────────────────────────────────────────
 
@@ -89,7 +88,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let gossipsub_config = gossipsub::ConfigBuilder::default()
                 .heartbeat_interval(Duration::from_secs(3))
-                .validation_mode(gossipsub::ValidationMode::Lenient)
+                .validation_mode(gossipsub::ValidationMode::Strict)
                 .message_id_fn(msg_id_fn)
                 .build()
                 .expect("valid gossipsub config");
@@ -101,11 +100,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .expect("gossipsub behaviour");
 
             // mDNS — automatic local peer discovery (no bootstrap needed)
-            let mdns = mdns::tokio::Behaviour::new(
-                mdns::Config::default(),
-                key.public().to_peer_id(),
-            )
-            .expect("mdns behaviour");
+            let mdns =
+                mdns::tokio::Behaviour::new(mdns::Config::default(), key.public().to_peer_id())
+                    .expect("mdns behaviour");
 
             // Identify — peers exchange protocol/version info on connect
             let identify = identify::Behaviour::new(identify::Config::new(
@@ -113,7 +110,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 key.public(),
             ));
 
-            Ok(AgentBehaviour { gossipsub, mdns, identify })
+            Ok(AgentBehaviour {
+                gossipsub,
+                mdns,
+                identify,
+            })
         })?
         .with_swarm_config(|c| c.with_idle_connection_timeout(Duration::from_secs(60)))
         .build();
@@ -329,7 +330,11 @@ fn handle_message(
                     timestamp: Utc::now(),
                 };
 
-                match swarm.behaviour_mut().gossipsub.publish(topic.clone(), answer.serialize()) {
+                match swarm
+                    .behaviour_mut()
+                    .gossipsub
+                    .publish(topic.clone(), answer.serialize())
+                {
                     Ok(_) => {}
                     Err(e) => tracing::warn!("answer publish failed: {e}"),
                 }

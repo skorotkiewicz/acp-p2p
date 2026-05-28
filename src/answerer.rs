@@ -6,12 +6,16 @@ use crate::protocol::Capability;
 
 pub struct Answerer {
     pub capabilities: Vec<Capability>,
+    #[allow(dead_code)]
     pub alias: String,
 }
 
 impl Answerer {
     pub fn new(alias: String, capabilities: Vec<Capability>) -> Self {
-        Self { alias, capabilities }
+        Self {
+            alias,
+            capabilities,
+        }
     }
 
     /// Try to answer a question. Returns (answer_text, confidence) or None if can't answer.
@@ -31,7 +35,7 @@ impl Answerer {
                     \x20   }\n\
                     }\n\
                     For large n, use an iterative version or memoization."
-                    .to_string(),
+                        .to_string(),
                     0.97,
                 ));
             }
@@ -39,7 +43,7 @@ impl Answerer {
                 return Some((
                     "Rust lifetimes ensure references never outlive the data they point to. \
                     The borrow checker enforces this at compile time. Use 'a, 'b etc. to annotate."
-                    .to_string(),
+                        .to_string(),
                     0.91,
                 ));
             }
@@ -47,7 +51,7 @@ impl Answerer {
                 return Some((
                     "Rust async uses `async fn` + `.await`. You need a runtime like Tokio. \
                     Futures are lazy — they do nothing until polled."
-                    .to_string(),
+                        .to_string(),
                     0.88,
                 ));
             }
@@ -102,7 +106,7 @@ impl Answerer {
                 return Some((
                     "P2P networks remove the central server. Peers discover each other via DHT, \
                     mDNS, or bootstrap nodes, then communicate directly. libp2p is a great toolkit."
-                    .to_string(),
+                        .to_string(),
                     0.89,
                 ));
             }
@@ -114,7 +118,7 @@ impl Answerer {
                 return Some((
                     "Fibonacci sequence: F(0)=0, F(1)=1, F(n)=F(n-1)+F(n-2). \
                     Closed form: F(n) = round(φⁿ/√5) where φ=(1+√5)/2 (golden ratio)."
-                    .to_string(),
+                        .to_string(),
                     0.99,
                 ));
             }
@@ -122,7 +126,7 @@ impl Answerer {
                 return Some((
                     "Primality test: trial division up to √n. For large numbers use \
                     Miller-Rabin probabilistic test. Sieve of Eratosthenes for bulk generation."
-                    .to_string(),
+                        .to_string(),
                     0.94,
                 ));
             }

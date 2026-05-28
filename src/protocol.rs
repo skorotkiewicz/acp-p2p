@@ -1,8 +1,8 @@
 // src/protocol.rs
 // ACP message types exchanged between agents over gossipsub
 
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 /// A capability tag an agent can declare (e.g. "rust", "python", "math")
 pub type Capability = String;
@@ -38,19 +38,16 @@ pub enum AcpMessage {
 
     /// Agent answers a previously asked question
     Answer {
-        question_id: String,    // links back to Question
+        question_id: String, // links back to Question
         from_peer: String,
         from_alias: String,
         content: String,
-        confidence: f32,        // 0.0 - 1.0, agent's self-reported confidence
+        confidence: f32, // 0.0 - 1.0, agent's self-reported confidence
         timestamp: DateTime<Utc>,
     },
 
     /// Agent gracefully leaves the mesh
-    Goodbye {
-        peer_id: String,
-        alias: String,
-    },
+    Goodbye { peer_id: String, alias: String },
 }
 
 impl AcpMessage {

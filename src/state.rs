@@ -1,11 +1,12 @@
 // In-memory state for a single agent node
 
-use std::collections::HashMap;
-use crate::protocol::{AgentInfo, AcpMessage};
+use crate::protocol::{AcpMessage, AgentInfo};
 use chrono::{DateTime, Utc};
+use std::collections::HashMap;
 
 /// A question this agent asked, tracking incoming answers
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct PendingQuestion {
     pub question_id: String,
     pub content: String,
@@ -14,6 +15,7 @@ pub struct PendingQuestion {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct ReceivedAnswer {
     pub from_alias: String,
     pub from_peer: String,
@@ -49,7 +51,11 @@ impl AgentState {
 
     pub fn add_peer(&mut self, info: AgentInfo) {
         if info.peer_id != self.me.peer_id {
-            println!("  [mesh] peer joined: {} ({})", info.alias, &info.peer_id[..12]);
+            println!(
+                "  [mesh] peer joined: {} ({})",
+                info.alias,
+                &info.peer_id[..12]
+            );
             self.peers.insert(info.peer_id.clone(), info);
         }
     }
@@ -61,8 +67,14 @@ impl AgentState {
     }
 
     pub fn record_question(&mut self, q: &AcpMessage) {
-        if let AcpMessage::Question { question_id, content, .. } = q {
-            self.seen_questions.insert(question_id.clone(), content.clone());
+        if let AcpMessage::Question {
+            question_id,
+            content,
+            ..
+        } = q
+        {
+            self.seen_questions
+                .insert(question_id.clone(), content.clone());
         }
     }
 
@@ -83,7 +95,9 @@ impl AgentState {
         if required_caps.is_empty() {
             return true; // broadcast to all
         }
-        required_caps.iter().any(|cap| self.me.capabilities.contains(cap))
+        required_caps
+            .iter()
+            .any(|cap| self.me.capabilities.contains(cap))
     }
 
     pub fn peer_count(&self) -> usize {
@@ -94,8 +108,13 @@ impl AgentState {
         if self.peers.is_empty() {
             println!("  No peers connected yet.");
         } else {
-            for (_, p) in &self.peers {
-                println!("  - {} [{}] caps: {:?}", p.alias, &p.peer_id[..12], p.capabilities);
+            for p in self.peers.values() {
+                println!(
+                    "  - {} [{}] caps: {:?}",
+                    p.alias,
+                    &p.peer_id[..12],
+                    p.capabilities
+                );
             }
         }
     }
