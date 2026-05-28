@@ -1,13 +1,18 @@
+// src/protocol.rs
 // ACP message types exchanged between agents over gossipsub
 
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
+
+/// A capability tag an agent can declare (e.g. "rust", "python", "math")
+pub type Capability = String;
 
 /// Unique agent identity (derived from libp2p PeerId, but human-readable alias too)
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentInfo {
     pub peer_id: String,
     pub alias: String,
+    pub capabilities: Vec<Capability>,
 }
 
 /// All message types flowing over the P2P network
@@ -26,16 +31,18 @@ pub enum AcpMessage {
         from_peer: String,
         from_alias: String,
         content: String,
+        /// Optional: only agents with these capabilities should answer
+        required_caps: Vec<Capability>,
         timestamp: DateTime<Utc>,
     },
 
     /// Agent answers a previously asked question
     Answer {
-        question_id: String,
+        question_id: String,    // links back to Question
         from_peer: String,
         from_alias: String,
         content: String,
-        confidence: f32,
+        confidence: f32,        // 0.0 - 1.0, agent's self-reported confidence
         timestamp: DateTime<Utc>,
     },
 

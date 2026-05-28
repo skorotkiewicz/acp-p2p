@@ -1,4 +1,3 @@
-// src/main.rs
 // ACP P2P Agent — libp2p-powered mesh where agents ask and answer each other.
 //
 // Usage:
