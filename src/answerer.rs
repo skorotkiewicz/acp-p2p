@@ -22,7 +22,7 @@ impl Answerer {
     pub fn try_answer(&self, question: &str) -> Option<(String, f32)> {
         let q = question.to_lowercase();
 
-        // ── Rust knowledge ──────────────────────────────────────────────────
+        // -- Rust knowledge --
         if self.capabilities.contains(&"rust".to_string()) {
             if q.contains("fibonacci") && q.contains("rust") {
                 return Some((
@@ -65,7 +65,7 @@ impl Answerer {
             }
         }
 
-        // ── Python knowledge ────────────────────────────────────────────────
+        // -- Python knowledge --
         if self.capabilities.contains(&"python".to_string()) {
             if q.contains("fibonacci") && (q.contains("python") || !q.contains("rust")) {
                 return Some((
@@ -92,7 +92,7 @@ impl Answerer {
             }
         }
 
-        // ── Networking knowledge ────────────────────────────────────────────
+        // -- Networking knowledge --
         if self.capabilities.contains(&"networking".to_string()) {
             if q.contains("tcp") || q.contains("udp") {
                 return Some((
@@ -112,7 +112,7 @@ impl Answerer {
             }
         }
 
-        // ── Math knowledge ──────────────────────────────────────────────────
+        // -- Math knowledge --
         if self.capabilities.contains(&"math".to_string()) {
             if q.contains("fibonacci") {
                 return Some((

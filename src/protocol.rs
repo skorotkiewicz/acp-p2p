@@ -1,4 +1,3 @@
-// src/protocol.rs
 // ACP message types exchanged between agents over gossipsub
 
 use chrono::{DateTime, Utc};

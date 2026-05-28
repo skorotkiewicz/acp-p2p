@@ -27,7 +27,7 @@ use answerer::Answerer;
 use protocol::{AcpMessage, AgentInfo};
 use state::{AgentState, PendingQuestion, ReceivedAnswer};
 
-// ─── CLI ────────────────────────────────────────────────────────────────────
+// -- CLI --─
 
 #[derive(Parser, Debug)]
 #[command(name = "acp-agent", about = "ACP P2P Agent Node")]
@@ -41,7 +41,7 @@ struct Cli {
     caps: String,
 }
 
-// ─── Combined NetworkBehaviour ───────────────────────────────────────────────
+// -- Combined NetworkBehaviour --
 
 #[derive(NetworkBehaviour)]
 struct AgentBehaviour {
@@ -50,11 +50,11 @@ struct AgentBehaviour {
     identify: identify::Behaviour,
 }
 
-// ─── Topic ───────────────────────────────────────────────────────────────────
+// -- Topic --
 
 const ACP_TOPIC: &str = "acp-mesh-v1";
 
-// ─── Main ────────────────────────────────────────────────────────────────────
+// -- Main --
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -70,7 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         cli.caps.split(',').map(|s| s.trim().to_string()).collect()
     };
 
-    // ── Build the libp2p swarm ───────────────────────────────────────────────
+    // -- Build the libp2p swarm --
     let mut swarm = libp2p::SwarmBuilder::with_new_identity()
         .with_tokio()
         .with_tcp(
@@ -126,7 +126,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Listen on all interfaces, random port
     swarm.listen_on("/ip4/0.0.0.0/tcp/0".parse()?)?;
 
-    // ── Agent state ──────────────────────────────────────────────────────────
+    // -- Agent state --
     let peer_id = swarm.local_peer_id().to_string();
     let me = AgentInfo {
         peer_id: peer_id.clone(),
@@ -137,34 +137,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut state = AgentState::new(me.clone());
     let answerer = Answerer::new(cli.alias.clone(), capabilities.clone());
 
-    println!("\n╔══════════════════════════════════════════╗");
-    println!("║         ACP P2P Agent Mesh               ║");
-    println!("╚══════════════════════════════════════════╝");
+    println!("ACP P2P Agent Mesh");
     println!("  alias      : {}", cli.alias);
     println!("  peer_id    : {}", &peer_id[..20]);
     println!("  caps       : {:?}", capabilities);
     println!("\n  Commands:");
-    println!("    ask <question>   — broadcast a question to all agents");
-    println!("    peers            — list connected peers");
-    println!("    quit             — leave the mesh\n");
+    println!("    ask <question>   - broadcast a question to all agents");
+    println!("    peers            - list connected peers");
+    println!("    quit             - leave the mesh\n");
 
-    // ── Stdin reader ─────────────────────────────────────────────────────────
+    // -- Stdin reader --
     let stdin = BufReader::new(io::stdin());
     let mut lines = stdin.lines();
 
-    // ── Announce ourselves after a short delay ───────────────────────────────
+    // -- Announce ourselves after a short delay --
     // Give the swarm time to start listening before announcing
     let announce_msg = AcpMessage::Announce {
         agent: me.clone(),
         timestamp: Utc::now(),
     };
 
-    // ── Main event loop ──────────────────────────────────────────────────────
+    // -- Main event loop --
     let mut announced = false;
 
     loop {
         tokio::select! {
-            // ── Swarm events ────────────────────────────────────────────────
+            // -- Swarm events --
             event = swarm.select_next_some() => match event {
 
                 SwarmEvent::NewListenAddr { address, .. } => {
@@ -217,7 +215,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 _ => {}
             },
 
-            // ── Stdin commands ───────────────────────────────────────────────
+            // -- Stdin commands --
             Ok(Some(line)) = lines.next_line() => {
                 let line = line.trim().to_string();
                 if line.is_empty() { continue; }
@@ -268,7 +266,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-// ─── Message handler ─────────────────────────────────────────────────────────
+// -- Message handler --
 
 fn handle_message(
     msg: AcpMessage,
