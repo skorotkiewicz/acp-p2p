@@ -20,18 +20,6 @@ just build-all
 ```bash
 # Run the agent
 ./target/release/agent --alias alice --caps rust,math
-
-# Connect to a specific peer at startup
-just run --peer /ip4/127.0.0.1/tcp/12345/p2p/<peer-id> --alias alice
-
-# Generate ephemeral identity (don't persist to file)
-just run --ephemeral --alias test
-
-# Disable mDNS discovery
-just run --no-mdns --alias isolated
-
-# Custom listen address
-just run --listen /ip4/0.0.0.0/tcp/9000
 ```
 
 <details>
@@ -73,7 +61,9 @@ Once running, the agent accepts interactive commands:
 - `peers` - list known peers
 - `quit` - exit the mesh
 
-## Features
+
+<details>
+  <summary>features</summary>
 
 - Peer-to-peer networking using libp2p
 - Agent Client Protocol (ACP) implementation
@@ -81,6 +71,9 @@ Once running, the agent accepts interactive commands:
 - Automatic peer discovery via mDNS
 - Async runtime with Tokio
 - Command-line interface with clap
+
+</details>
+
 
 ## Contributing
 
