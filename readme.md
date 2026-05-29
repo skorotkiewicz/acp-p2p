@@ -1,24 +1,24 @@
-# ACP-P2P
+# acp-p2p
 
-A peer-to-peer implementation of the Agent Client Protocol (ACP) for decentralized agent communication.
+a peer-to-peer implementation of the Agent Client Protocol (ACP) for decentralized agent communication.
 
-## Installation
+## installation
 
 ```bash
-# Clone the repository
+# clone the repository
 git clone --depth 1 https://github.com/skorotkiewicz/acp-p2p
 cd acp-p2p
 
-# Build with ACP features enabled
+# build with ACP features enabled
 cargo build --release --features acp
 # or
 just build-all
 ```
 
-## Usage
+## usage
 
 ```bash
-# Run the agent
+# run the agent
 ./target/release/agent --alias alice --caps rust,math
 ```
 
@@ -26,32 +26,32 @@ just build-all
   <summary>examples</summary>
 
 ```bash
-# Connect to a specific peer at startup
+# connect to a specific peer at startup
 just run --peer /ip4/127.0.0.1/tcp/12345/p2p/<peer-id> --alias alice
 
-# Generate ephemeral identity (don't persist to file)
+# generate ephemeral identity (don't persist to file)
 just run --ephemeral --alias test
 
-# Disable mDNS discovery
+# disable mDNS discovery
 just run --no-mdns --alias isolated
 
-# Custom listen address
+# custom listen address
 just run --listen /ip4/0.0.0.0/tcp/9000
 ```
 
 </details>
 
 
-The agent is configured via command-line arguments:
+the agent is configured via command-line arguments:
 
-- `--alias <name>` - Human-readable alias for this agent
-- `--caps <list>` - Comma-separated capability tags (e.g. rust,math,python)
-- `--peer <multiaddr>` - Peer multiaddr to connect to at startup
-- `--ephemeral` - Generate a new in-memory identity (don't persist)
-- `--no-mdns` - Disable automatic peer discovery
-- `--listen <multiaddr>` - Custom listen address (can be repeated)
+- `--alias <name>` - human-readable alias for this agent
+- `--caps <list>` - comma-separated capability tags (e.g. rust,math,python)
+- `--peer <multiaddr>` - peer multiaddr to connect to at startup
+- `--ephemeral` - generate a new in-memory identity (don't persist)
+- `--no-mdns` - disable automatic peer discovery
+- `--listen <multiaddr>` - custom listen address (can be repeated)
 
-Once running, the agent accepts interactive commands:
+once running, the agent accepts interactive commands:
 
 - `ask <question>` - broadcast a question to all peers
 - `ask --caps rust,math <question>` - ask agents with specific capabilities
@@ -65,20 +65,20 @@ Once running, the agent accepts interactive commands:
 <details>
   <summary>features</summary>
 
-- Peer-to-peer networking using libp2p
-- Agent Client Protocol (ACP) implementation
-- Support for gossipsub messaging
-- Automatic peer discovery via mDNS
-- Async runtime with Tokio
-- Command-line interface with clap
+- peer-to-peer networking using libp2p
+- agent client protocol (ACP) implementation
+- support for gossipsub messaging
+- automatic peer discovery via mDNS
+- async runtime with Tokio
+- command-line interface with clap
 
 </details>
 
 
-## Contributing
+## contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+contributions are welcome! please feel free to submit a pull request.
 
-## License
+## license
 
-MIT License
+MIT license
