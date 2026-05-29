@@ -13,7 +13,7 @@ build-all:
     # cargo build --release --features "acp,loop,git-worktree,mcp"
 
 run *args:
-    cargo run -- {{ args }}
+    cargo run --all-targets --all-features -- {{ args }}
 
 fmt:
     cargo fmt
